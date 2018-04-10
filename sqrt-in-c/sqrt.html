@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<script>
+  function fetchAndInstantiateWasm(url, imports) {
+    return fetch(url)
+    .then(result => {
+      if (result.ok) {
+        return result.arrayBuffer();
+      }
+      throw new Error(`Unable to fetch Web Assembly file ${url}.`);
+    })
+    .then(bytes => WebAssembly.compile(bytes))
+    .then(module => WebAssembly.instantiate(module, imports || {}))
+    .then(instance => instance.exports);
+  }
+
+  fetchAndInstantiateWasm('./sqrt.wasm')
+  .then(m => {
+    window.getSqrt = m.getSqrt;
+  });
+</script>
+
+</body>
+</html>
