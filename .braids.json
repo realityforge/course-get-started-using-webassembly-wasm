@@ -1,0 +1,10 @@
+{
+  "config_version": 1,
+  "mirrors": {
+    "vendor/wasm-intro": {
+      "url": "https://github.com/guybedford/wasm-intro",
+      "branch": "master",
+      "revision": "1a9689aeb2a7ca20b7a17f47b08c1a28e8e0ec76"
+    }
+  }
+}
