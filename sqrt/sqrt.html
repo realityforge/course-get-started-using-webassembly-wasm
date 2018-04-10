@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<script>
+  fetch('./sqrt.wasm')
+  .then(result => {
+    if (result.ok) {
+      return result.arrayBuffer();
+    }
+    throw new Error(`Unable to fetch WASM.`);
+  }).then(bytes => {
+    return WebAssembly.compile(bytes);
+  }).then(module => {
+    return WebAssembly.instantiate(module);
+  }).then(instance => {
+    window.wasmSqrt = instance.exports.sqrt;
+  });
+</script>
+
+</body>
+</html>
