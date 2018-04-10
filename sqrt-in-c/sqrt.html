@@ -18,7 +18,7 @@
     .then(instance => instance.exports);
   }
 
-  fetchAndInstantiateWasm('./sqrt.wasm')
+  fetchAndInstantiateWasm('./sqrt.wasm', { env: { consoleLog: num => console.log(num) } })
   .then(m => {
     window.getSqrt = m.getSqrt;
   });
