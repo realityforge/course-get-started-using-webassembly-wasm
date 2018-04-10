@@ -4,6 +4,8 @@
 *.html text
 *.json text
 *.md text
+*.wasm binary
+*.wat text
 .gitattributes text
 .gitignore text
 .ruby-version text
