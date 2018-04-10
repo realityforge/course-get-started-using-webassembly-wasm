@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<script>
+  function fetchAndInstantiateWasm(url, imports) {
+    return fetch(url)
+    .then(result => {
+      if (result.ok) {
+        return result.arrayBuffer();
+      }
+      throw new Error(`Unable to fetch Web Assembly file ${url}.`);
+    })
+    .then(bytes => WebAssembly.compile(bytes))
+    .then(module => WebAssembly.instantiate(module, imports || {}))
+    .then(instance => instance.exports);
+  }
+  let mem;
+
+  function writeString(str, offset) {
+    const buffer = new TextEncoder().encode(str);
+    const output = new Uint8Array(mem.buffer, offset, buffer.length);
+    for (let i = 0; i < buffer.length; i++) {
+      output[i] = buffer[i];
+    }
+  }
+
+  fetchAndInstantiateWasm('./mem_writer.wasm', {
+    env: {
+      consoleLog(offset, len) {
+        const buffer = new Uint8Array(mem.buffer, offset, len);
+        console.log(new TextDecoder().decode(buffer));
+      }
+    }
+  })
+  .then(m => {
+    // The memory variable is a TypedArray
+    mem = m.memory;
+    // Directly change web assembly memory
+    writeString('Hello Web Assembly', m.getInStrOffset());
+    // Invoke method in web assembly that lower cases above string and calls consoleLog
+    m.toLowerCase();
+  });
+
+</script>
+
+</body>
+</html>
