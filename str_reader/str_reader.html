@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+<script>
+  function fetchAndInstantiateWasm(url, imports) {
+    return fetch(url)
+    .then(result => {
+      if (result.ok) {
+        return result.arrayBuffer();
+      }
+      throw new Error(`Unable to fetch Web Assembly file ${url}.`);
+    })
+    .then(bytes => WebAssembly.compile(bytes))
+    .then(module => WebAssembly.instantiate(module, imports || {}))
+    .then(instance => instance.exports);
+  }
+
+  fetchAndInstantiateWasm('./str_reader.wasm', { env: { consoleLog: num => console.log(num) } })
+  .then(m => {
+    // The memory variable is a TypedArray
+    const memory = m.memory;
+    // Buffer for reading the string
+    const buffer = new Uint8Array(memory.buffer, m.getStrOffset(), 11);
+    // Decode the buffer into a string to write to console
+    const str = new TextDecoder().decode(buffer);
+    console.log(str);
+  });
+</script>
+
+</body>
+</html>
