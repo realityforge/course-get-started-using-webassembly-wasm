@@ -18,25 +18,20 @@
     .then(instance => instance.exports);
   }
 
-  // Indirection so that memory module can set these values for mem_alloc module even
-  // though the memory module is created after mem_alloc module
-  let wasmMalloc;
-  let wasmFree;
-  let memAllocModule;
+  // initial size is in 64KiB blocks
+  let mem = new WebAssembly.Memory({ initial: 1 });
 
-  fetchAndInstantiateWasm('./mem_alloc.wasm', {
+  // memory.wasm is prebuilt module provided by author of course
+  fetchAndInstantiateWasm('./memory.wasm', { env: { memory: mem } })
+  .then(m => {
+    fetchAndInstantiateWasm('./mem_alloc.wasm', {
     env: {
-      malloc: len => wasmMalloc(len),
-      free: addr => wasmFree(addr)
+      malloc: m.malloc,
+      free: m.free,
+      memory: mem
     }
-  }).then(m => {
-    memAllocModule = m;
-    // memory.wasm is prebuilt module provided by author of course
-    fetchAndInstantiateWasm('./memory.wasm', { env: { memory: m.memory } })
-    .then(a => {
-      wasmMalloc = a.malloc;
-      wasmFree = a.free;
-      console.log(memAllocModule.createRecord(23, 42, 37));
+    }).then(a => {
+      console.log(a.createRecord(23, 42, 37));
     });
   });
 
